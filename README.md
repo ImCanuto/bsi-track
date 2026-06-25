@@ -63,6 +63,23 @@ A versão web serve apenas para inspeção rápida de layout. SQLite e notifica�
 não funcionam no browser, então o fluxo de login, persistência de progresso e lembretes
 ficam indisponíveis.
 
+## Conta de administrador (teste)
+
+Na primeira abertura, o app cria automaticamente uma conta de administrador para testes,
+usada para acessar o painel `admin/` (gerenciar trilhas, repopular o seed, exportar o banco,
+ver alunos):
+
+| Campo  | Valor         |
+|--------|---------------|
+| E-mail | `admin@admin` |
+| Senha  | `admin`       |
+
+A criação é idempotente (não duplica a conta) e vale também para bancos já existentes na
+próxima inicialização. Para usar, faça login com essas credenciais e abra o painel pelo Perfil.
+
+> Atenção: é uma credencial fraca, apenas para desenvolvimento/teste. Antes de distribuir o
+> APK, troque a senha ou remova esse seed (`seedAdminUser` em `src/db/migrations.ts`).
+
 ## Testes
 
 Os testes unitários cobrem as funções puras de cálculo de progresso em `src/utils/calculos.ts`:
@@ -135,3 +152,5 @@ app/
   atividades) fica no SQLite local do dispositivo.
 - O **seed com 160 disciplinas** (mais trilhas e demais registros do catálogo) é executado
   automaticamente na primeira abertura do app.
+- Uma **conta admin de teste** (`admin@admin` / `admin`) é criada automaticamente no boot
+  (`seedAdminUser` em `src/db/migrations.ts`). Veja a seção "Conta de administrador (teste)".

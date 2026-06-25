@@ -6,6 +6,7 @@
  *  - `PRAGMA user_version` controla a versão do schema instalada no device.
  *  - A flag `db_initialized` em `app_meta` indica se o seed já rodou.
  */
+import * as Crypto from 'expo-crypto';
 import type * as SQLite from 'expo-sqlite';
 
 import { createTables, getDatabase } from './schema';
@@ -13,6 +14,35 @@ import { seedDatabase } from './seed';
 
 /** Versão atual do schema da aplicação. Incrementar ao adicionar migrações. */
 export const SCHEMA_VERSION = 1;
+
+/** Credenciais do admin padrão criado automaticamente no boot. */
+const ADMIN_EMAIL = 'admin@admin';
+const ADMIN_SENHA = 'admin';
+
+/**
+ * Garante a existência de uma conta admin padrão (admin@admin / admin).
+ * Idempotente: só insere se o e-mail ainda não existir. A senha é gravada como
+ * hash SHA-256, no mesmo formato esperado pelo login (authStore).
+ */
+async function seedAdminUser(db: SQLite.SQLiteDatabase): Promise<void> {
+  const existente = await db.getFirstAsync<{ id: number }>(
+    'SELECT id FROM usuarios WHERE email = ?',
+    ADMIN_EMAIL,
+  );
+  if (existente) return;
+
+  const hash = await Crypto.digestStringAsync(
+    Crypto.CryptoDigestAlgorithm.SHA256,
+    ADMIN_SENHA,
+  );
+  await db.runAsync(
+    `INSERT INTO usuarios (nome, email, senha_hash, perfil, ra, periodo_ingresso)
+     VALUES (?, ?, ?, 'admin', NULL, NULL)`,
+    'Administrador',
+    ADMIN_EMAIL,
+    hash,
+  );
+}
 
 async function getUserVersion(db: SQLite.SQLiteDatabase): Promise<number> {
   const row = await db.getFirstAsync<{ user_version: number }>('PRAGMA user_version');
@@ -82,6 +112,9 @@ export async function initDatabase(): Promise<SQLite.SQLiteDatabase> {
     await setMeta(db, 'db_initialized', 'true');
     await setMeta(db, 'seeded_at', new Date().toISOString());
   }
+
+  // 4) Garante o admin padrão (idempotente, vale também para bancos já existentes).
+  await seedAdminUser(db);
 
   return db;
 }

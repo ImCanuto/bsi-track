@@ -27,6 +27,7 @@ import {
   agendarLembreteInicioSemestre,
   cancelarTodasNotificacoes,
   configurarNotificacoes,
+  notificacoesDisponiveis,
 } from '@/src/utils/notificacoes';
 
 const TEMAS: { valor: Tema; label: string }[] = [
@@ -70,6 +71,13 @@ export default function PerfilScreen() {
 
   async function alternarNotificacoes(valor: boolean) {
     if (valor) {
+      if (!notificacoesDisponiveis()) {
+        Alert.alert(
+          'Indisponível no Expo Go',
+          'As notificações foram removidas do Expo Go. Use um build de desenvolvimento ou o APK final para ativá-las.',
+        );
+        return;
+      }
       const ok = await configurarNotificacoes();
       if (!ok) {
         Alert.alert('Notificações', 'Permissão de notificações não concedida.');

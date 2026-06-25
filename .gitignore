@@ -39,3 +39,9 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+.claude/
+AGENTS.md
+.vscode/
+PROMPT_BSI_Track_Completo.md
+CLAUDE.md
