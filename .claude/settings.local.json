@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "PowerShell(npx tsc --noEmit)",
-      "PowerShell(npx expo export --platform android)",
-      "PowerShell(npm test *)"
-    ]
-  }
-}
